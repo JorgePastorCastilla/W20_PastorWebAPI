@@ -340,6 +340,14 @@ namespace W20_PastorWebAPI.Controllers
             return Ok();
         }
 
+        // GET api/Account/UserId
+        [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
+        [Route("UserId")]
+        public string GetUserId()
+        {
+            return RequestContext.Principal.Identity.GetUserId();
+        }
+
         // POST api/Account/RegisterExternal
         [OverrideAuthentication]
         [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
