@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
+using Dapper;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -70,8 +72,18 @@ namespace W20_PastorWebAPI.Controllers
         [Route("Logout")]
         public IHttpActionResult Logout()
         {
+            string authenticatedAspNetUserId = RequestContext.Principal.Identity.GetUserId();
             Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+            logout(authenticatedAspNetUserId);
             return Ok();
+        }
+        public void logout(string id)
+        {
+            using (IDbConnection cnn = new ApplicationDbContext().Database.Connection)
+            {
+                string sql = $"Update dbo.Players SET isLog = 0 WHERE Id LIKE '{id}'";
+                cnn.Execute(sql);
+            }
         }
 
         // GET api/Account/ManageInfo?returnUrl=%2F&generateState=true

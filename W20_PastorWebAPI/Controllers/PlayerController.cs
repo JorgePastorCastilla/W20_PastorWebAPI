@@ -45,12 +45,52 @@ namespace W20_PastorWebAPI.Controllers
             string authenticatedAspNetUserId = RequestContext.Principal.Identity.GetUserId();
             using (IDbConnection cnn = new ApplicationDbContext().Database.Connection)
             {
+                login(authenticatedAspNetUserId);
+                //TODO: CAMBIAR LOS CAMPOS DEL SELECT
                 string sql = $"SELECT Id, Name, Email, BirthDay FROM dbo.Players " +
                     $"WHERE Id LIKE '{authenticatedAspNetUserId}'";
                 var player = cnn.Query<PlayerModel>(sql).FirstOrDefault();
                 return player;
             }
         }
+        // GET api/Player/Players
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("Players")]
+        public List<PlayerModel> players()
+        {
+            string authenticatedAspNetUserId = RequestContext.Principal.Identity.GetUserId();
+            using (IDbConnection cnn = new ApplicationDbContext().Database.Connection)
+            {
+                login(authenticatedAspNetUserId);
+                //TODO: CAMBIAR LOS CAMPOS DEL SELECT
+                string sql = $"SELECT Name, BirthDay, LastLog FROM dbo.Players " +
+                    $"WHERE isLog = 1";
+                var players = cnn.Query<PlayerModel>(sql).ToList();
+                return players;
+            }
+        }
+        // GET api/Player/Info
+        [HttpGet]
+        [Route("Logout")]
+        public void logout(string id)
+        {
+            using (IDbConnection cnn = new ApplicationDbContext().Database.Connection)
+            {
+                string sql = $"Update dbo.Players SET isLog = 0 WHERE Id LIKE '{id}'";
+                cnn.Execute(sql);
+            }
+        }
+
+        public void login(string id)
+        {
+            using (IDbConnection cnn = new ApplicationDbContext().Database.Connection)
+            {
+                string sql = $"Update dbo.Players SET isLog = 1, LastLog = GETDATE() WHERE Id LIKE '{id}'";
+                cnn.Execute(sql);
+            }
+        }
+
 
     }
 }
